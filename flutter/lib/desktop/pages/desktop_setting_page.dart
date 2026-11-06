@@ -2299,7 +2299,7 @@ class _AccountState extends State<_Account> {
 
   Widget accountTokenCompatibilityOption() {
     return Obx(() {
-      if (!isWindows || !gFFI.userModel.isLogin) {
+      if (!gFFI.userModel.isLogin) {
         return const SizedBox.shrink();
       }
       return Column(

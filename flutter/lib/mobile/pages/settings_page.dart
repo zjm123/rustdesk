@@ -107,6 +107,7 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
   var _enableWebrtc = false;
   var _isUsingPublicServer = false;
   var _allowAskForNoteAtEndOfConnection = false;
+  var _allowAccountTokenOmission = false;
   var _preventSleepWhileConnected = true;
 
   _SettingsState() {
@@ -151,6 +152,8 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
     _enableWebrtc = mainGetLocalBoolOptionSync(kOptionEnableWebrtc);
     _allowAskForNoteAtEndOfConnection =
         mainGetLocalBoolOptionSync(kOptionAllowAskForNoteAtEndOfConnection);
+    _allowAccountTokenOmission =
+        mainGetLocalBoolOptionSync(kOptionAllowAccountTokenOmission);
     _preventSleepWhileConnected =
         mainGetLocalBoolOptionSync(kOptionKeepAwakeDuringOutgoingSessions);
     _showTerminalExtraKeys =
@@ -763,6 +766,30 @@ class _SettingsState extends State<SettingsPage> with WidgetsBindingObserver {
                   }
                 },
               ),
+              if (gFFI.userModel.isLogin)
+                SettingsTile.switchTile(
+                  title: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(translate('Omit account token for custom servers')),
+                      Text(
+                        translate(
+                          'The custom server may not apply account-based connection restrictions while this is enabled.',
+                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                  initialValue: _allowAccountTokenOmission,
+                  onToggle: (value) async {
+                    await mainSetLocalBoolOption(
+                        kOptionAllowAccountTokenOmission, value);
+                    setState(() {
+                      _allowAccountTokenOmission = mainGetLocalBoolOptionSync(
+                          kOptionAllowAccountTokenOmission);
+                    });
+                  },
+                ),
             ],
           ),
         SettingsSection(title: Text(translate("Settings")), tiles: [

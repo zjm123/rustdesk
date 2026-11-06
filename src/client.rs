@@ -367,7 +367,6 @@ fn tcp_punch_allowed() -> bool {
             || crate::get_webrtc_enabled())
 }
 
-#[cfg(any(target_os = "windows", test))]
 fn rendezvous_account_token(
     token: &str,
     compatibility_enabled: bool,
@@ -381,19 +380,12 @@ fn rendezvous_account_token(
 }
 
 pub(crate) fn account_token_for_rendezvous(token: &str) -> String {
-    #[cfg(target_os = "windows")]
-    {
-        rendezvous_account_token(
-            token,
-            LocalConfig::get_option("allow-account-token-omission") == "Y",
-            !Config::get_option("custom-rendezvous-server").is_empty(),
-        )
-        .to_owned()
-    }
-    #[cfg(not(target_os = "windows"))]
-    {
-        token.to_owned()
-    }
+    rendezvous_account_token(
+        token,
+        LocalConfig::get_option("allow-account-token-omission") == "Y",
+        !Config::get_option("custom-rendezvous-server").is_empty(),
+    )
+    .to_owned()
 }
 
 #[cfg(test)]
