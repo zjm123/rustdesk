@@ -826,5 +826,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("install-directory-not-empty-tip", "Dosja e zgjedhur nuk është bosh. Instalimi mund të fshijë të dhënat ekzistuese. Konsideroni të zgjidhni një dosje tjetër."),
         ("Request approval", "Kërko miratim"),
         ("Forever", "Përgjithmonë"),
+        ("Omit account token for custom servers", ""),
+        ("The custom server may not apply account-based connection restrictions while this is enabled.", ""),
     ].iter().cloned().collect();
 }

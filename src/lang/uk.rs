@@ -826,5 +826,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("install-directory-not-empty-tip", "Вибрана тека не порожня. Встановлення може видалити наявні дані. Радимо вибрати іншу теку."),
         ("Request approval", "Запросити схвалення"),
         ("Forever", "Назавжди"),
+        ("Omit account token for custom servers", ""),
+        ("The custom server may not apply account-based connection restrictions while this is enabled.", ""),
     ].iter().cloned().collect();
 }

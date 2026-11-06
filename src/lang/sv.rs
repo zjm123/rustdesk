@@ -826,5 +826,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("install-directory-not-empty-tip", "Den valda mappen är inte tom. Installationen kan radera befintliga data. Överväg att välja en annan mapp."),
         ("Request approval", "Begär godkännande"),
         ("Forever", "För alltid"),
+        ("Omit account token for custom servers", ""),
+        ("The custom server may not apply account-based connection restrictions while this is enabled.", ""),
     ].iter().cloned().collect();
 }

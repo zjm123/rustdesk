@@ -826,5 +826,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("install-directory-not-empty-tip", "پوشه انتخاب‌شده خالی نیست. نصب ممکن است داده‌های موجود را حذف کند. بهتر است پوشه دیگری انتخاب کنید."),
         ("Request approval", "درخواست تأیید"),
         ("Forever", "برای همیشه"),
+        ("Omit account token for custom servers", ""),
+        ("The custom server may not apply account-based connection restrictions while this is enabled.", ""),
     ].iter().cloned().collect();
 }

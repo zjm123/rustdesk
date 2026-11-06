@@ -367,6 +367,59 @@ fn tcp_punch_allowed() -> bool {
             || crate::get_webrtc_enabled())
 }
 
+#[cfg(any(target_os = "windows", test))]
+fn rendezvous_account_token(
+    token: &str,
+    compatibility_enabled: bool,
+    custom_server_configured: bool,
+) -> &str {
+    if compatibility_enabled && custom_server_configured {
+        ""
+    } else {
+        token
+    }
+}
+
+pub(crate) fn account_token_for_rendezvous(token: &str) -> String {
+    #[cfg(target_os = "windows")]
+    {
+        rendezvous_account_token(
+            token,
+            LocalConfig::get_option("allow-account-token-omission") == "Y",
+            !Config::get_option("custom-rendezvous-server").is_empty(),
+        )
+        .to_owned()
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        token.to_owned()
+    }
+}
+
+#[cfg(test)]
+mod account_token_compat_tests {
+    use super::rendezvous_account_token;
+
+    #[test]
+    fn compatibility_mode_omits_only_the_rendezvous_account_token() {
+        let account_token = "api-account-token";
+
+        assert_eq!(
+            rendezvous_account_token(account_token, false, true),
+            account_token
+        );
+        assert_eq!(
+            rendezvous_account_token(account_token, true, false),
+            account_token
+        );
+        assert_eq!(
+            rendezvous_account_token(account_token, true, true),
+            ""
+        );
+        assert_eq!(rendezvous_account_token("", true, true), "");
+    }
+}
+
 impl Client {
     const CLIENT_CLIPBOARD_NAME: &'static str = "client-clipboard";
 

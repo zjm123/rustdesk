@@ -826,5 +826,7 @@ pub static ref T: std::collections::HashMap<&'static str, &'static str> =
         ("install-directory-not-empty-tip", "所选文件夹不为空。安装可能删除现有数据。建议选择其他文件夹。"),
         ("Request approval", "请求批准"),
         ("Forever", "永久"),
+        ("Omit account token for custom servers", "连接自定义服务器时不发送账号令牌"),
+        ("The custom server may not apply account-based connection restrictions while this is enabled.", "启用后，自定义服务器可能无法应用基于账号的连接限制。"),
     ].iter().cloned().collect();
 }

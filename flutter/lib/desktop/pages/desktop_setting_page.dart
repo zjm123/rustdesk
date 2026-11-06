@@ -2285,9 +2285,44 @@ class _AccountState extends State<_Account> {
     return ListView(
       controller: scrollController,
       children: [
-        _Card(title: 'Account', children: [accountAction(), useInfo()]),
+        _Card(
+          title: 'Account',
+          children: [
+            accountAction(),
+            useInfo(),
+            accountTokenCompatibilityOption(),
+          ],
+        ),
       ],
     ).marginOnly(bottom: _kListViewBottomMargin);
+  }
+
+  Widget accountTokenCompatibilityOption() {
+    return Obx(() {
+      if (!isWindows || !gFFI.userModel.isLogin) {
+        return const SizedBox.shrink();
+      }
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _OptionCheckBox(
+            context,
+            'Omit account token for custom servers',
+            'allow-account-token-omission',
+            isServer: false,
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 25, top: 4, bottom: 8),
+            child: Text(
+              translate(
+                'The custom server may not apply account-based connection restrictions while this is enabled.',
+              ),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   Widget accountAction() {
