@@ -190,7 +190,10 @@ class _OnlineStatusWidgetState extends State<OnlineStatusWidget> {
 
 /// Connection page for connecting to a remote peer.
 class ConnectionPage extends StatefulWidget {
-  const ConnectionPage({Key? key}) : super(key: key);
+  final bool isFileTransferMode;
+
+  const ConnectionPage({Key? key, this.isFileTransferMode = false})
+      : super(key: key);
 
   @override
   State<ConnectionPage> createState() => _ConnectionPageState();
@@ -317,11 +320,13 @@ class _ConnectionPageState extends State<ConnectionPage>
             ).marginOnly(top: 22),
             SizedBox(height: 12),
             Divider().paddingOnly(right: 12),
-            Expanded(child: PeerTabPage()),
+            if (!widget.isFileTransferMode) Expanded(child: PeerTabPage()),
           ],
         ).paddingOnly(left: 12.0)),
-        if (!isOutgoingOnly) const Divider(height: 1),
-        if (!isOutgoingOnly) OnlineStatusWidget()
+        if (!isOutgoingOnly && !widget.isFileTransferMode)
+          const Divider(height: 1),
+        if (!isOutgoingOnly && !widget.isFileTransferMode)
+          OnlineStatusWidget()
       ],
     );
   }
@@ -377,7 +382,7 @@ class _ConnectionPageState extends State<ConnectionPage>
   /// Search for a peer.
   Widget _buildRemoteIDTextField(BuildContext context) {
     var w = Container(
-      width: 320 + 20 * 2,
+      width: double.infinity,
       padding: const EdgeInsets.fromLTRB(20, 24, 20, 22),
       decoration: BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(13)),
@@ -385,7 +390,16 @@ class _ConnectionPageState extends State<ConnectionPage>
       child: Ink(
         child: Column(
           children: [
-            getConnectionPageTitle(context, false).marginOnly(bottom: 15),
+            if (widget.isFileTransferMode)
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  translate('Transfer file'),
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ).marginOnly(bottom: 15)
+            else
+              getConnectionPageTitle(context, false).marginOnly(bottom: 15),
             Row(
               children: [
                 Expanded(
@@ -474,7 +488,9 @@ class _ConnectionPageState extends State<ConnectionPage>
                             _idController.id = v;
                           },
                           onSubmitted: (_) {
-                            onConnect();
+                            onConnect(
+                                isFileTransfer:
+                                    widget.isFileTransferMode);
                           },
                         ).workaroundFreezeLinuxMint());
                   },
@@ -555,13 +571,16 @@ class _ConnectionPageState extends State<ConnectionPage>
                   height: 28.0,
                   child: ElevatedButton(
                     onPressed: () {
-                      onConnect();
+                      onConnect(
+                          isFileTransfer: widget.isFileTransferMode);
                     },
-                    child: Text(translate("Connect")),
+                    child: Text(translate(widget.isFileTransferMode
+                        ? "Transfer file"
+                        : "Connect")),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Container(
+                if (!widget.isFileTransferMode) const SizedBox(width: 8),
+                if (!widget.isFileTransferMode) Container(
                   height: 28.0,
                   width: 28.0,
                   decoration: BoxDecoration(
@@ -659,6 +678,6 @@ class _ConnectionPageState extends State<ConnectionPage>
       ),
     );
     return Container(
-        constraints: const BoxConstraints(maxWidth: 600), child: w);
+        constraints: const BoxConstraints(maxWidth: 900), child: w);
   }
 }

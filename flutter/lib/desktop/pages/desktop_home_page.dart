@@ -6,6 +6,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hbb/common.dart';
+import 'package:flutter_hbb/common/widgets/peer_tab_page.dart';
 import 'package:flutter_hbb/common/widgets/animated_rotation_widget.dart';
 import 'package:flutter_hbb/common/widgets/custom_password.dart';
 import 'package:flutter_hbb/consts.dart';
@@ -34,9 +35,12 @@ class DesktopHomePage extends StatefulWidget {
 
 const borderColor = Color(0xFF2F65BA);
 
+enum _HomeSection { remote, devices, fileTransfer }
+
 class _DesktopHomePageState extends State<DesktopHomePage>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   final _leftPaneScrollController = ScrollController();
+  _HomeSection _homeSection = _HomeSection.remote;
 
   @override
   bool get wantKeepAlive => true;
@@ -80,65 +84,151 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   Widget buildNavigationPane(BuildContext context) {
-    final textColor = Theme.of(context).textTheme.titleLarge?.color;
-    final backgroundColor = Theme.of(context).colorScheme.background;
-    final activeColor = Theme.of(context).colorScheme.primary;
-
+    const backgroundColor = Color(0xFF18212D);
+    const mutedColor = Color(0xFFAAB5C3);
+    const activeColor = Color(0xFF2B5DA7);
     Widget item(IconData icon, String label,
-        {bool active = false, VoidCallback? onTap}) {
-      final child = Container(
-        width: 96,
-        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-        decoration: BoxDecoration(
-          color: active ? activeColor.withOpacity(0.12) : Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
+        {required bool active, VoidCallback? onTap}) {
+      final child = SizedBox(
+        height: 38,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9),
+          decoration: BoxDecoration(
+            color: active ? activeColor : Colors.transparent,
+            borderRadius: BorderRadius.circular(5),
+          ),
+          child: Row(
+            children: [
+              Icon(icon,
+                  size: 18, color: active ? Colors.white : mutedColor),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  translate(label),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: active ? Colors.white : mutedColor,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
+      );
+      return onTap == null
+          ? child
+          : InkWell(
+              borderRadius: BorderRadius.circular(5),
+              onTap: onTap,
+              child: child,
+            );
+    }
+
+    return Obx(() {
+      final isReady = !svcStopped.value &&
+          stateGlobal.svcStatus.value == SvcStatus.ready;
+      final statusText = svcStopped.value
+          ? "Service is not running"
+          : stateGlobal.svcStatus.value == SvcStatus.connecting
+              ? "connecting_status"
+              : stateGlobal.svcStatus.value == SvcStatus.notReady
+                  ? "not_ready_status"
+                  : "Ready";
+      return Container(
+        width: 140,
+        color: backgroundColor,
+        padding: const EdgeInsets.fromLTRB(12, 21, 12, 12),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(icon,
-                size: 20, color: active ? activeColor : textColor?.withOpacity(0.6)),
-            const SizedBox(height: 5),
-            Text(
-              translate(label),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11,
-                color: active ? activeColor : textColor?.withOpacity(0.65),
+            Row(
+              children: [
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4D7FD1),
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: const Icon(Icons.desktop_windows,
+                      color: Colors.white, size: 14),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'RustDesk',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 25),
+            Padding(
+              padding: const EdgeInsets.only(left: 9, bottom: 7),
+              child: Text(
+                translate("Your Desktop"),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Color(0xFF718092),
+                  fontSize: 10,
+                ),
+              ),
+            ),
+            item(Icons.support_agent, 'Remote',
+                active: _homeSection == _HomeSection.remote,
+                onTap: () => setState(
+                    () => _homeSection = _HomeSection.remote)),
+            item(Icons.devices, 'Recent sessions',
+                active: _homeSection == _HomeSection.devices,
+                onTap: () => setState(
+                    () => _homeSection = _HomeSection.devices)),
+            item(Icons.swap_horiz, 'Transfer file',
+                active: _homeSection == _HomeSection.fileTransfer,
+                onTap: () => setState(
+                    () => _homeSection = _HomeSection.fileTransfer)),
+            item(Icons.settings_outlined, 'Settings',
+                active: false,
+                onTap: DesktopTabPage.onAddSetting),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.only(top: 12, left: 8, right: 4),
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: Color(0x1FFFFFFF)),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.circle,
+                    size: 8,
+                    color: isReady
+                        ? const Color(0xFF35A77A)
+                        : const Color(0xFFD99B39),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      translate(statusText),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(color: mutedColor, fontSize: 11),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       );
-      return onTap == null ? child : InkWell(onTap: onTap, child: child);
-    }
-
-    return Container(
-      width: 112,
-      color: backgroundColor,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 18),
-      child: Column(
-        children: [
-          Container(
-            width: 30,
-            height: 30,
-            decoration: BoxDecoration(
-              color: activeColor,
-              borderRadius: BorderRadius.circular(7),
-            ),
-            child: const Icon(Icons.desktop_windows,
-                color: Colors.white, size: 18),
-          ),
-          const SizedBox(height: 26),
-          item(Icons.support_agent, 'Remote support', active: true),
-          item(Icons.devices, 'Device list'),
-          item(Icons.swap_horiz, 'File transfer'),
-          const Spacer(),
-          item(Icons.settings_outlined, 'Settings',
-              onTap: DesktopTabPage.onAddSetting),
-        ],
-      ),
-    );
+    });
   }
 
   Widget buildLeftPane(BuildContext context) {
@@ -245,13 +335,22 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   }
 
   buildRightPane(BuildContext context) {
+    final isOutgoingOnly = bind.isOutgoingOnly();
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: Column(
         children: [
-          if (!bind.isIncomingOnly() && !bind.isOutgoingOnly())
-            buildLocalInfoHeader(context),
-          Expanded(child: ConnectionPage()),
+          if (!isOutgoingOnly) buildLocalInfoHeader(context),
+          Expanded(
+            child: isOutgoingOnly
+                ? ConnectionPage()
+                : switch (_homeSection) {
+                    _HomeSection.remote => ConnectionPage(),
+                    _HomeSection.devices => const PeerTabPage(),
+                    _HomeSection.fileTransfer =>
+                      const ConnectionPage(isFileTransferMode: true),
+                  },
+          ),
         ],
       ),
     );
