@@ -59,12 +59,16 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   Widget build(BuildContext context) {
     super.build(context);
     final isIncomingOnly = bind.isIncomingOnly();
+    final isOutgoingOnly = bind.isOutgoingOnly();
     return _buildBlock(
         child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        buildLeftPane(context),
-        if (!isIncomingOnly) const VerticalDivider(width: 1),
+        if (!isIncomingOnly && !isOutgoingOnly) buildNavigationPane(context),
+        if (!isIncomingOnly && !isOutgoingOnly)
+          const VerticalDivider(width: 1),
+        if (isIncomingOnly || isOutgoingOnly) buildLeftPane(context),
+        if (isOutgoingOnly) const VerticalDivider(width: 1),
         if (!isIncomingOnly) Expanded(child: buildRightPane(context)),
       ],
     ));
@@ -73,6 +77,68 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   Widget _buildBlock({required Widget child}) {
     return buildRemoteBlock(
         block: _block, mask: true, use: canBeBlocked, child: child);
+  }
+
+  Widget buildNavigationPane(BuildContext context) {
+    final textColor = Theme.of(context).textTheme.titleLarge?.color;
+    final backgroundColor = Theme.of(context).colorScheme.background;
+    final activeColor = Theme.of(context).colorScheme.primary;
+
+    Widget item(IconData icon, String label,
+        {bool active = false, VoidCallback? onTap}) {
+      final child = Container(
+        width: 96,
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        decoration: BoxDecoration(
+          color: active ? activeColor.withOpacity(0.12) : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Column(
+          children: [
+            Icon(icon,
+                size: 20, color: active ? activeColor : textColor?.withOpacity(0.6)),
+            const SizedBox(height: 5),
+            Text(
+              translate(label),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11,
+                color: active ? activeColor : textColor?.withOpacity(0.65),
+              ),
+            ),
+          ],
+        ),
+      );
+      return onTap == null ? child : InkWell(onTap: onTap, child: child);
+    }
+
+    return Container(
+      width: 112,
+      color: backgroundColor,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 18),
+      child: Column(
+        children: [
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: activeColor,
+              borderRadius: BorderRadius.circular(7),
+            ),
+            child: const Icon(Icons.desktop_windows,
+                color: Colors.white, size: 18),
+          ),
+          const SizedBox(height: 26),
+          item(Icons.support_agent, 'Remote support', active: true),
+          item(Icons.devices, 'Device list'),
+          item(Icons.swap_horiz, 'File transfer'),
+          const Spacer(),
+          item(Icons.settings_outlined, 'Settings',
+              onTap: DesktopTabPage.onAddSetting),
+        ],
+      ),
+    );
   }
 
   Widget buildLeftPane(BuildContext context) {
@@ -90,8 +156,8 @@ class _DesktopHomePageState extends State<DesktopHomePage>
         child: loadLogo(),
       ),
       buildTip(context),
-      if (!isOutgoingOnly) buildIDBoard(context),
-      if (!isOutgoingOnly) buildPasswordBoard(context),
+      if (!isOutgoingOnly && isIncomingOnly) buildIDBoard(context),
+      if (!isOutgoingOnly && isIncomingOnly) buildPasswordBoard(context),
       FutureBuilder<Widget>(
         future: Future.value(
             Obx(() => buildHelpCards(stateGlobal.updateUrl.value))),
@@ -181,7 +247,27 @@ class _DesktopHomePageState extends State<DesktopHomePage>
   buildRightPane(BuildContext context) {
     return Container(
       color: Theme.of(context).scaffoldBackgroundColor,
-      child: ConnectionPage(),
+      child: Column(
+        children: [
+          if (!bind.isIncomingOnly() && !bind.isOutgoingOnly())
+            buildLocalInfoHeader(context),
+          Expanded(child: ConnectionPage()),
+        ],
+      ),
+    );
+  }
+
+  Widget buildLocalInfoHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 14, 20, 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(child: buildIDBoard(context)),
+          const SizedBox(width: 10),
+          Expanded(child: buildPasswordBoard(context)),
+        ],
+      ),
     );
   }
 
