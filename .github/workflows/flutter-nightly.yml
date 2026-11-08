@@ -12,5 +12,5 @@ jobs:
     secrets: inherit
     with:
       upload-artifact: true
-      upload-tag: "nightly-1.0.1"
+      upload-tag: "nightly-1.0.2"
       publish-update-metadata: ${{ github.repository == 'rustdesk/rustdesk' }}
