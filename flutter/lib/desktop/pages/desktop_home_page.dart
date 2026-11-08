@@ -466,13 +466,10 @@ class _DesktopHomePageState extends State<DesktopHomePage>
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          SizedBox(
-            width: 112,
-            child: AutoSizeText(
-              translate("One-time Password"),
-              style: const TextStyle(fontSize: 14, color: Colors.black),
-              maxLines: 1,
-            ),
+          Text(
+            translate("One-time Password"),
+            style: const TextStyle(fontSize: 14, color: Colors.black),
+            maxLines: 1,
           ),
           const SizedBox(width: 8),
           Expanded(
